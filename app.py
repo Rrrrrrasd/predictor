@@ -133,4 +133,5 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))  # Render는 PORT를 환경변수로 전달함
+    app.run(host="0.0.0.0", port=port)
