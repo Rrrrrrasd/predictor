@@ -18,6 +18,7 @@ def download_file_with_wget(filename, url):
     if not os.path.exists(filename):
         print(f"Downloading {filename} via wget...")
         os.system(f"wget --no-check-certificate '{url}' -O {filename}")
+        print(f"Downloaded {filename} ({os.path.getsize(filename)} bytes)")
     else:
         print(f"{filename} already exists ({os.path.getsize(filename)} bytes)")
 
