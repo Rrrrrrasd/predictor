@@ -11,14 +11,18 @@ import os
 
 app = Flask(__name__)
 
-# 모델 및 스케일러 자동 다운로드
+print("=== Flask app starting... ===")
 
+# 모델 및 스케일러 자동 다운로드
 def download_file_if_missing(filename, url):
     if not os.path.exists(filename):
         print(f"Downloading {filename}...")
         r = requests.get(url)
         with open(filename, 'wb') as f:
             f.write(r.content)
+        print(f"Downloaded {filename} ({os.path.getsize(filename)} bytes)")
+    else:
+        print(f"{filename} already exists ({os.path.getsize(filename)} bytes)")
 
 # Google Drive 다운로드 링크들
 H5_URL = "https://docs.google.com/uc?export=download&id=1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy"
@@ -28,6 +32,8 @@ CSV_URL = "https://docs.google.com/uc?export=download&id=1nJbZM24DCPcLvhvToC57CF
 download_file_if_missing("lstm_btc_model10.h5", H5_URL)
 download_file_if_missing("scaler_btc_model10.save", SCALE_URL)
 download_file_if_missing("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_URL)
+
+print("=== Download complete. Loading model and scaler... ===")
 
 # 모델 및 스케일러 로딩
 model = load_model("lstm_btc_model10.h5")
@@ -134,4 +140,5 @@ def predict():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render는 PORT를 환경변수로 전달함
+    print(f"=== Running Flask on port {port} ===")
     app.run(host="0.0.0.0", port=port)
