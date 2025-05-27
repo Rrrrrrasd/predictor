@@ -2,7 +2,8 @@ from flask import Flask, jsonify
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, Dropout, LSTM, Dense
 from sklearn.preprocessing import MinMaxScaler
 import joblib
 import requests
@@ -24,25 +25,15 @@ def download_file_with_gdown(filename, file_id):
         print(f"{filename} already exists ({os.path.getsize(filename)} bytes)")
 
 # Google Drive 파일 ID만 따로 지정
-H5_ID = "1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy"
 SCALE_ID = "1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8"
 CSV_ID = "1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV"
 
-download_file_with_gdown("lstm_btc_model10.h5", H5_ID)
 download_file_with_gdown("scaler_btc_model10.save", SCALE_ID)
 download_file_with_gdown("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_ID)
 
 print("=== Download complete. Loading model and scaler... ===")
 
-# 모델 및 스케일러 로딩
-model = load_model("lstm_btc_model10.h5")
-scaler = joblib.load("scaler_btc_model10.save")
-
-# 온체인 데이터 로드
-pulse_data = pd.read_csv("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv")
-pulse_data['timestamp'] = pd.to_datetime(pulse_data['timestamp'])
-pulse_data_daily = pulse_data.resample('1D', on='timestamp').mean()
-
+# 모델 직접 정의
 FEATURES = [
     'Close_BTC-USD', 'High_BTC-USD', 'Low_BTC-USD', 'Open_BTC-USD', 'Volume_BTC-USD',
     'MA5', 'MA10', 'MA15', 'MA20', 'days_since_halving',
@@ -52,6 +43,25 @@ FEATURES = [
     'price_position', 'volume_spike', 'days_since_peak', 'return_7d',
     'rsi', 'macd', 'ma_ratio_5_20'
 ]
+
+def build_model(input_shape):
+    model = Sequential([
+        Conv1D(filters=256, kernel_size=3, activation='relu', input_shape=input_shape),
+        Dropout(0.2),
+        LSTM(128),
+        Dropout(0.2),
+        Dense(1)
+    ])
+    model.compile(optimizer='adam', loss='mse')
+    return model
+
+model = build_model((30, len(FEATURES)))
+scaler = joblib.load("scaler_btc_model10.save")
+
+# 온체인 데이터 로드
+pulse_data = pd.read_csv("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv")
+pulse_data['timestamp'] = pd.to_datetime(pulse_data['timestamp'])
+pulse_data_daily = pulse_data.resample('1D', on='timestamp').mean()
 
 def fetch_btc_data():
     url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily"
@@ -138,6 +148,6 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render는 PORT를 환경변수로 전달함
+    port = int(os.environ.get("PORT", 5000))
     print(f"=== Running Flask on port {port} ===")
     app.run(host="0.0.0.0", port=port)
