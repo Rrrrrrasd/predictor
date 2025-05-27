@@ -40,8 +40,8 @@ model = load_model("lstm_btc_model10.h5")
 scaler = joblib.load("scaler_btc_model10.save")
 
 # 온체인 데이터 로드
-pulse_data = pd.read_csv("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv")
-pulse_data['timestamp'] = pd.to_datetime(pulse_data['timestamp'])
+usecols = ['timestamp', 'btc_dominance', 'altcoin_market_cap', 'fear_greed_index', 'trend_bitcoin', 'trend_buy_crypto']
+pulse_data = pd.read_csv("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", usecols=usecols + ['timestamp'])
 pulse_data_daily = pulse_data.resample('1D', on='timestamp').mean()
 
 FEATURES = [
