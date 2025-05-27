@@ -14,22 +14,20 @@ app = Flask(__name__)
 print("=== Flask app starting... ===")
 
 # 모델 및 스케일러 자동 다운로드
-def download_file_with_wget(filename, url):
-    if not os.path.exists(filename):
-        print(f"Downloading {filename} via wget...")
-        os.system(f"wget --no-check-certificate '{url}' -O {filename}")
-        print(f"Downloaded {filename} ({os.path.getsize(filename)} bytes)")
-    else:
-        print(f"{filename} already exists ({os.path.getsize(filename)} bytes)")
+def download_file_with_gdown(file_id, output):
+    if not os.path.exists(output):
+        import subprocess
+        print(f"Downloading {output} via gdown...")
+        subprocess.run(f"gdown --id {file_id} -O {output}", shell=True, check=True)
 
-# Google Drive 다운로드 링크들
-H5_URL = "https://docs.google.com/uc?export=download&id=1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy"
-SCALE_URL = "https://docs.google.com/uc?export=download&id=1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8"
-CSV_URL = "https://docs.google.com/uc?export=download&id=1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV"
+# Google Drive 파일 ID만 따로 지정
+H5_ID = "1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy"
+SCALE_ID = "1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8"
+CSV_ID = "1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV"
 
-download_file_with_wget("lstm_btc_model10.h5", H5_URL)
-download_file_with_wget("scaler_btc_model10.save", SCALE_URL)
-download_file_with_wget("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_URL)
+download_file_with_gdown(H5_ID, "lstm_btc_model10.h5")
+download_file_with_gdown(SCALE_ID, "scaler_btc_model10.save")
+download_file_with_gdown(CSV_ID, "Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv")
 
 print("=== Download complete. Loading model and scaler... ===")
 
