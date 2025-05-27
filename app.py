@@ -14,13 +14,10 @@ app = Flask(__name__)
 print("=== Flask app starting... ===")
 
 # 모델 및 스케일러 자동 다운로드
-def download_file_if_missing(filename, url):
+def download_file_with_wget(filename, url):
     if not os.path.exists(filename):
-        print(f"Downloading {filename}...")
-        r = requests.get(url)
-        with open(filename, 'wb') as f:
-            f.write(r.content)
-        print(f"Downloaded {filename} ({os.path.getsize(filename)} bytes)")
+        print(f"Downloading {filename} via wget...")
+        os.system(f"wget --no-check-certificate '{url}' -O {filename}")
     else:
         print(f"{filename} already exists ({os.path.getsize(filename)} bytes)")
 
@@ -29,9 +26,9 @@ H5_URL = "https://docs.google.com/uc?export=download&id=1k_GSUawmurPCuOInGPy2V8U
 SCALE_URL = "https://docs.google.com/uc?export=download&id=1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8"
 CSV_URL = "https://docs.google.com/uc?export=download&id=1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV"
 
-download_file_if_missing("lstm_btc_model10.h5", H5_URL)
-download_file_if_missing("scaler_btc_model10.save", SCALE_URL)
-download_file_if_missing("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_URL)
+download_file_with_wget("lstm_btc_model10.h5", H5_URL)
+download_file_with_wget("scaler_btc_model10.save", SCALE_URL)
+download_file_with_wget("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_URL)
 
 print("=== Download complete. Loading model and scaler... ===")
 
