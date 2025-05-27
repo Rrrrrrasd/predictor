@@ -57,7 +57,20 @@ FEATURES = [
 def fetch_btc_data():
     url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily"
     response = requests.get(url)
-    prices = response.json()['prices']
+
+    # 응답 오류 처리
+    if response.status_code != 200:
+        raise ValueError(f"API 요청 실패: {response.status_code} - {response.text[:200]}")
+
+    try:
+        data = response.json()
+    except Exception as e:
+        raise ValueError(f"응답 JSON 파싱 실패: {e} - 원문: {response.text[:200]}")
+
+    prices = data.get("prices")
+    if not prices:
+        raise ValueError("API 응답에 'prices' 항목 없음")
+
     df = pd.DataFrame(prices, columns=['timestamp', 'Close_BTC-USD'])
     df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('date', inplace=True)
@@ -66,6 +79,7 @@ def fetch_btc_data():
     df['Low_BTC-USD'] = df['Close_BTC-USD']
     df['Volume_BTC-USD'] = 1.0
     return df
+
 
 def add_features(df):
     df['MA5'] = df['Close_BTC-USD'].rolling(window=5).mean()
