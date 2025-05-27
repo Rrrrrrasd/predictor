@@ -55,31 +55,27 @@ FEATURES = [
 ]
 
 def fetch_btc_data():
-    url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily"
-    response = requests.get(url)
+    url = "https://api.upbit.com/v1/candles/days"
+    params = {"market": "KRW-BTC", "count": 30}
+    headers = {"Accept": "application/json"}
+    response = requests.get(url, params=params, headers=headers)
 
-    # 응답 오류 처리
     if response.status_code != 200:
-        raise ValueError(f"API 요청 실패: {response.status_code} - {response.text[:200]}")
+        raise ValueError(f"Upbit API 요청 실패: {response.status_code} - {response.text[:200]}")
 
-    try:
-        data = response.json()
-    except Exception as e:
-        raise ValueError(f"응답 JSON 파싱 실패: {e} - 원문: {response.text[:200]}")
-
-    prices = data.get("prices")
-    if not prices:
-        raise ValueError("API 응답에 'prices' 항목 없음")
-
-    df = pd.DataFrame(prices, columns=['timestamp', 'Close_BTC-USD'])
-    df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
+    data = response.json()
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['candle_date_time_kst'])
     df.set_index('date', inplace=True)
-    df['Open_BTC-USD'] = df['Close_BTC-USD']
-    df['High_BTC-USD'] = df['Close_BTC-USD']
-    df['Low_BTC-USD'] = df['Close_BTC-USD']
-    df['Volume_BTC-USD'] = 1.0
+    df = df.sort_index()
+    df.rename(columns={
+        'opening_price': 'Open_BTC-USD',
+        'high_price': 'High_BTC-USD',
+        'low_price': 'Low_BTC-USD',
+        'trade_price': 'Close_BTC-USD',
+        'candle_acc_trade_volume': 'Volume_BTC-USD'
+    }, inplace=True)
     return df
-
 
 def add_features(df):
     df['MA5'] = df['Close_BTC-USD'].rolling(window=5).mean()
