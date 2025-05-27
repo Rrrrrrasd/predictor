@@ -1,8 +1,9 @@
-flask
-tensorflow
-numpy
-pandas
-scikit-learn
-ta
+flask>=2.2.0
+tensorflow==2.11.1
+numpy<2.0
+pandas>=1.5.0
+scikit-learn>=1.2.0
+ta==0.11.0
 requests
 gunicorn
+joblib
