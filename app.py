@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 print("=== Flask app starting... ===")
 
-# 모델 및 스케일러 자동 다운로드
+# 모델 및 스케일러 자동 다운로드 (gdown 사용)
 def download_file_with_gdown(filename, file_id):
     if not os.path.exists(filename):
         print(f"Downloading {filename} via gdown...")
@@ -28,9 +28,9 @@ H5_ID = "1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy"
 SCALE_ID = "1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8"
 CSV_ID = "1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV"
 
-download_file_with_gdown("lstm_btc_model10.h5", "1k_GSUawmurPCuOInGPy2V8UF2RHrUvKy")
-download_file_with_gdown("scaler_btc_model10.save", "1ZhW30tKiRUuJbaPLxMjDx9-WXrVr1Ke8")
-download_file_with_gdown("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", "1nJbZM24DCPcLvhvToC57CFaDBhbNfIgV")
+download_file_with_gdown("lstm_btc_model10.h5", H5_ID)
+download_file_with_gdown("scaler_btc_model10.save", SCALE_ID)
+download_file_with_gdown("Bitcoin_Pulse_Hourly_Dataset_from_Markets_Trends_and_Fear.csv", CSV_ID)
 
 print("=== Download complete. Loading model and scaler... ===")
 
