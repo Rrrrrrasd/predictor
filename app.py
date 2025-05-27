@@ -111,10 +111,16 @@ def add_features(df):
 def merge_onchain(df):
     joined = df.copy()
     onchain = pulse_data_daily.reindex(joined.index)
-    for col in onchain.columns:
-        if not col.endswith("_missing"):
-            onchain[col] = onchain[col].fillna(-1)
-            onchain[f"{col}_missing"] = (onchain[col] == -1).astype(int)
+    onchain = onchain.fillna(-1)
+    
+    # 누락 여부 컬럼들을 한 번에 생성
+    missing_cols = {
+        f"{col}_missing": (onchain[col] == -1).astype(int)
+        for col in onchain.columns
+        if not col.endswith("_missing")
+    }
+
+    onchain = pd.concat([onchain, pd.DataFrame(missing_cols, index=onchain.index)], axis=1)
     return joined.join(onchain)
 
 @app.route("/predict", methods=["GET"])
